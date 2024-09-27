@@ -1,9 +1,12 @@
+// File: game/hangman.go
+
 package game
 
 import (
 	"fmt"
 	"hangman/ascii"
 	"hangman/graphic"
+	"hangman/sounds"
 	"hangman/utils"
 	"math/rand"
 	"strings"
@@ -15,11 +18,9 @@ import (
 	"golang.org/x/term"
 )
 
-// Helper function to center a string based on terminal width
 func centerString(s string) string {
 	width, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
-		// Si on ne peut pas obtenir la taille du terminal, retourner la chaîne telle quelle
 		return s
 	}
 	if len(s) >= width {
@@ -33,13 +34,16 @@ func StartGame() {
 	words, err := utils.ReadWordsFromFile("mot.txt")
 	if err != nil {
 		utils.WriteColorLn(centerString("Erreur lors de la lecture du fichier de mots"), "red")
+		time.Sleep(3 * time.Second)
+		utils.ClearTerminal()
+		graphic.RefreshMainMenu()
 		return
 	}
 
 	word := chooseRandomWord(words)
 	guessedLetters := make(map[rune]bool)
 	wrongGuesses := 0
-	maxWrongGuesses := 9
+	maxWrongGuesses := 9 // Ajusté en fonction des étapes disponibles
 
 	// Révéler une lettre aléatoire au début du jeu
 	revealRandomLetter(word, guessedLetters)
@@ -51,10 +55,16 @@ func StartGame() {
 		displayGuessedLetters(word, guessedLetters)
 		utils.WriteColorLn(centerString(fmt.Sprintf("Essais restants : %d", maxWrongGuesses-wrongGuesses)), "cyan")
 
-		utils.WriteColor(centerString("Entrez une lettre : "), "cyan")
+		utils.WriteColorLn(centerString("Entrez une lettre : "), "cyan")
 		guess, err := getInput()
 		if err != nil {
 			utils.WriteColorLn(centerString("Erreur lors de la saisie"), "red")
+			continue
+		}
+
+		if len(guess) != 1 {
+			utils.WriteColorLn(centerString("Veuillez entrer une seule lettre"), "yellow")
+			time.Sleep(1 * time.Second)
 			continue
 		}
 
@@ -71,11 +81,12 @@ func StartGame() {
 		if !strings.ContainsRune(word, letter) {
 			wrongGuesses++
 			utils.WriteColorLn(centerString(fmt.Sprintf("Mauvaise lettre : %c", letter)), "red")
-			time.Sleep(1 * time.Second)
 		} else {
 			utils.WriteColorLn(centerString(fmt.Sprintf("Bonne lettre : %c", letter)), "green")
-			time.Sleep(1 * time.Second)
 		}
+
+		utils.WriteColorLn(centerString("Veuillez patienter avant de rentrer une lettre..."), "yellow")
+		time.Sleep(1 * time.Second)
 
 		if isWordGuessed(word, guessedLetters) {
 			utils.ClearTerminal()
@@ -89,8 +100,11 @@ func StartGame() {
 		}
 	}
 
+	// Si l'utilisateur a perdu
 	utils.ClearTerminal()
+	go utils.PlaySound(sounds.Wasted, 1)
 	displayHangman(wrongGuesses)
+	displayWord(word, guessedLetters)
 	utils.WriteColorLn(centerString("Désolé, vous avez perdu. Le mot était : "+word), "red")
 	time.Sleep(3 * time.Second)
 	utils.ClearTerminal()
@@ -116,6 +130,12 @@ func displayHangman(wrongGuesses int) {
 		ascii.PenduStep8,
 		ascii.PenduStep9,
 		ascii.PenduStep10,
+	}
+
+	if wrongGuesses < 0 {
+		wrongGuesses = 0
+	} else if wrongGuesses >= len(hangmanASCII) {
+		wrongGuesses = len(hangmanASCII) - 1
 	}
 
 	centeredHangman := centerString(hangmanASCII[wrongGuesses])
@@ -146,9 +166,16 @@ func displayGuessedLetters(word string, guessedLetters map[rune]bool) {
 			wrongLetters += string(letter) + " "
 		}
 	}
-	guessed := "Lettres correctes : " + correctLetters + "\nLettres incorrectes : " + wrongLetters
-	centeredGuessed := centerString(guessed)
-	utils.Writeln(centeredGuessed)
+
+	// Appliquer des couleurs différentes et centrer les lignes
+	utils.WriteColorLn("Lettres correctes : "+correctLetters, "green")
+	utils.WriteColorLn("Lettres incorrectes : "+wrongLetters, "red")
+
+	centeredCorrect := centerString("Lettres correctes : " + correctLetters)
+	centeredWrong := centerString("Lettres incorrectes : " + wrongLetters)
+
+	utils.Writeln(centeredCorrect)
+	utils.Writeln(centeredWrong)
 }
 
 // Vérifier si le mot a été entièrement deviné
@@ -175,14 +202,7 @@ func getInput() (string, error) {
 	}
 
 	// Afficher la lettre saisie immédiatement
-	utils.WriteColor(string(r), "yellow")
-
-	// Supprimer l'attente d'appui sur Entrée
-	// utils.WriteColor(" (Appuyez sur Entrée pour confirmer) ", "yellow")
-	// _, err = tty.ReadRune() // Attendre l'appui sur Entrée
-	// if err != nil {
-	// 	return "", err
-	// }
+	utils.WriteColorLn(string(r), "yellow")
 
 	return string(r), nil
 }
@@ -191,7 +211,8 @@ func getInput() (string, error) {
 func revealRandomLetter(word string, guessedLetters map[rune]bool) {
 	rand.Seed(time.Now().UnixNano())
 	letterIndex := rand.Intn(len(word))
-	guessedLetters[rune(word[letterIndex])] = true
-	utils.WriteColorLn(centerString(fmt.Sprintf("Une lettre a été révélée : %c", word[letterIndex])), "green")
+	revealedLetter := rune(word[letterIndex])
+	guessedLetters[revealedLetter] = true
+	utils.WriteColorLn(centerString(fmt.Sprintf("Une lettre a été révélée : %c", revealedLetter)), "green")
 	time.Sleep(2 * time.Second)
 }
