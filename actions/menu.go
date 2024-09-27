@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"hangman/game"
 	"hangman/graphic"
 	"hangman/utils"
 	"hangman/values"
@@ -26,6 +27,7 @@ func MenuExec() {
 	switch values.CurrentOption {
 	case 0:
 		utils.ClearTerminal()
+		game.StartGame() // Ajout de cette ligne pour démarrer le jeu
 	case 1:
 		utils.ClearTerminal()
 		graphic.RefreshCreditsMenu()
