@@ -171,11 +171,6 @@ func displayGuessedLetters(word string, guessedLetters map[rune]bool) {
 	utils.WriteColorLn("Lettres correctes : "+correctLetters, "green")
 	utils.WriteColorLn("Lettres incorrectes : "+wrongLetters, "red")
 
-	centeredCorrect := centerString("Lettres correctes : " + correctLetters)
-	centeredWrong := centerString("Lettres incorrectes : " + wrongLetters)
-
-	utils.Writeln(centeredCorrect)
-	utils.Writeln(centeredWrong)
 }
 
 // Vérifier si le mot a été entièrement deviné

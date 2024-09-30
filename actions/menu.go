@@ -27,13 +27,13 @@ func MenuExec() {
 	switch values.CurrentOption {
 	case 0:
 		utils.ClearTerminal()
-		game.StartGame() // Ajout de cette ligne pour démarrer le jeu
+		game.StartGame()
 	case 1:
 		utils.ClearTerminal()
 		graphic.RefreshCreditsMenu()
 	case 2:
-		utils.ClearTerminal()
 		PressF11()
+		utils.ClearTerminal()
 		os.Exit(0)
 	}
 }
