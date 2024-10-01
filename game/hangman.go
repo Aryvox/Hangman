@@ -1,18 +1,15 @@
-// File: game/hangman.go
-
 package game
 
 import (
 	"fmt"
-	"hangman/ascii"
 	"hangman/graphic"
 	"hangman/sounds"
 	"hangman/utils"
 	"math/rand"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
-
-	"os"
 
 	"github.com/mattn/go-tty"
 	"golang.org/x/term"
@@ -43,9 +40,8 @@ func StartGame() {
 	word := chooseRandomWord(words)
 	guessedLetters := make(map[rune]bool)
 	wrongGuesses := 0
-	maxWrongGuesses := 9 // Ajusté en fonction des étapes disponibles
+	maxWrongGuesses := 9
 
-	// Révéler une lettre aléatoire au début du jeu
 	revealRandomLetter(word, guessedLetters)
 
 	for wrongGuesses < maxWrongGuesses {
@@ -100,9 +96,8 @@ func StartGame() {
 		}
 	}
 
-	// Si l'utilisateur a perdu
 	utils.ClearTerminal()
-	go utils.PlaySound(sounds.Wasted, 1)
+	utils.PlaySound(sounds.Wasted, 1)
 	displayHangman(wrongGuesses)
 	displayWord(word, guessedLetters)
 	utils.WriteColorLn(centerString("Désolé, vous avez perdu. Le mot était : "+word), "red")
@@ -111,38 +106,22 @@ func StartGame() {
 	graphic.RefreshMainMenu()
 }
 
-// Choisir un mot aléatoire parmi la liste
 func chooseRandomWord(words []string) string {
 	rand.Seed(time.Now().UnixNano())
 	return strings.ToUpper(words[rand.Intn(len(words))])
 }
 
-// Afficher l'état du pendu
 func displayHangman(wrongGuesses int) {
-	hangmanASCII := []string{
-		ascii.PenduStep1,
-		ascii.PenduStep2,
-		ascii.PenduStep3,
-		ascii.PenduStep4,
-		ascii.PenduStep5,
-		ascii.PenduStep6,
-		ascii.PenduStep7,
-		ascii.PenduStep8,
-		ascii.PenduStep9,
-		ascii.PenduStep10,
+	hangmanFile := fmt.Sprintf("hangman_step_%d.txt", wrongGuesses+1)
+	content, err := os.ReadFile(filepath.Join("ascii", hangmanFile))
+	if err != nil {
+		utils.WriteColorLn(centerString("Erreur lors de la lecture du fichier du pendu"), "red")
+		return
 	}
-
-	if wrongGuesses < 0 {
-		wrongGuesses = 0
-	} else if wrongGuesses >= len(hangmanASCII) {
-		wrongGuesses = len(hangmanASCII) - 1
-	}
-
-	centeredHangman := centerString(hangmanASCII[wrongGuesses])
+	centeredHangman := centerString(string(content))
 	utils.Writeln(centeredHangman)
 }
 
-// Afficher le mot avec les lettres devinées
 func displayWord(word string, guessedLetters map[rune]bool) {
 	var display string
 	for _, letter := range word {
@@ -156,7 +135,6 @@ func displayWord(word string, guessedLetters map[rune]bool) {
 	utils.Writeln(centeredWord)
 }
 
-// Afficher les lettres devinées, séparées en correctes et incorrectes
 func displayGuessedLetters(word string, guessedLetters map[rune]bool) {
 	var correctLetters, wrongLetters string
 	for letter := range guessedLetters {
@@ -167,13 +145,10 @@ func displayGuessedLetters(word string, guessedLetters map[rune]bool) {
 		}
 	}
 
-	// Appliquer des couleurs différentes et centrer les lignes
-	utils.WriteColorLn("Lettres correctes : "+correctLetters, "green")
-	utils.WriteColorLn("Lettres incorrectes : "+wrongLetters, "red")
-
+	utils.WriteColorLn(centerString("Lettres correctes : "+correctLetters), "green")
+	utils.WriteColorLn(centerString("Lettres incorrectes : "+wrongLetters), "red")
 }
 
-// Vérifier si le mot a été entièrement deviné
 func isWordGuessed(word string, guessedLetters map[rune]bool) bool {
 	for _, letter := range word {
 		if !guessedLetters[letter] {
@@ -183,7 +158,6 @@ func isWordGuessed(word string, guessedLetters map[rune]bool) bool {
 	return true
 }
 
-// Obtenir l'entrée de l'utilisateur et afficher la lettre immédiatement
 func getInput() (string, error) {
 	tty, err := tty.Open()
 	if err != nil {
@@ -196,13 +170,11 @@ func getInput() (string, error) {
 		return "", err
 	}
 
-	// Afficher la lettre saisie immédiatement
 	utils.WriteColorLn(string(r), "yellow")
 
 	return string(r), nil
 }
 
-// Révéler une lettre aléatoire au début du jeu
 func revealRandomLetter(word string, guessedLetters map[rune]bool) {
 	rand.Seed(time.Now().UnixNano())
 	letterIndex := rand.Intn(len(word))
