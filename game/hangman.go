@@ -97,11 +97,11 @@ func StartGame() {
 	}
 
 	utils.ClearTerminal()
-	utils.PlaySound(sounds.Wasted, 1)
 	displayHangman(wrongGuesses)
 	displayWord(word, guessedLetters)
 	utils.WriteColorLn(centerString("Désolé, vous avez perdu. Le mot était : "+word), "red")
-	time.Sleep(3 * time.Second)
+	utils.PlaySound(sounds.Wasted, 1)
+	time.Sleep(2 * time.Second)
 	utils.ClearTerminal()
 	graphic.RefreshMainMenu()
 }
