@@ -101,7 +101,6 @@ func StartGame() {
 	displayWord(word, guessedLetters)
 	utils.WriteColorLn(centerString("Désolé, vous avez perdu. Le mot était : "+word), "red")
 	utils.PlaySound(sounds.Wasted, 1)
-	time.Sleep(2 * time.Second)
 	utils.ClearTerminal()
 	graphic.RefreshMainMenu()
 }
