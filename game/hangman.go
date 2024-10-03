@@ -51,15 +51,35 @@ func StartGame() {
 		displayGuessedLetters(word, guessedLetters)
 		utils.WriteColorLn(centerString(fmt.Sprintf("Essais restants : %d", maxWrongGuesses-wrongGuesses)), "cyan")
 
-		utils.WriteColorLn(centerString("Entrez une lettre : "), "cyan")
+		utils.WriteColorLn(centerString("Entrez une lettre ou un mot : "), "cyan")
 		guess, err := getInput()
 		if err != nil {
 			utils.WriteColorLn(centerString("Erreur lors de la saisie"), "red")
 			continue
 		}
 
-		if len(guess) != 1 {
-			utils.WriteColorLn(centerString("Veuillez entrer une seule lettre"), "yellow")
+		// Vérifier si c'est une pénalité pour un mot incorrect
+		if guess == "PENALTY" {
+			wrongGuesses += 2
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		if len(guess) > 1 {
+			// Si c'est un mot complet et qu'il est correct (puisqu'il n'y a pas eu de pénalité)
+			if strings.ToUpper(strings.TrimSpace(guess)) == word {
+				utils.ClearTerminal()
+				displayHangman(wrongGuesses)
+				displayWord(word, guessedLetters)
+				utils.WriteColorLn(centerString("Félicitations ! Vous avez deviné le mot !"), "green")
+				time.Sleep(3 * time.Second)
+				utils.ClearTerminal()
+				graphic.RefreshMainMenu()
+				return
+			}
+			// Si on arrive ici, c'est que le mot n'était pas le bon
+			wrongGuesses++
+			utils.WriteColorLn(centerString("Ce n'est pas le bon mot !"), "red")
 			time.Sleep(1 * time.Second)
 			continue
 		}
@@ -101,6 +121,7 @@ func StartGame() {
 	displayWord(word, guessedLetters)
 	utils.WriteColorLn(centerString("Désolé, vous avez perdu. Le mot était : "+word), "red")
 	utils.PlaySound(sounds.Wasted, 1)
+	time.Sleep(3 * time.Second)
 	utils.ClearTerminal()
 	graphic.RefreshMainMenu()
 }
@@ -164,14 +185,42 @@ func getInput() (string, error) {
 	}
 	defer tty.Close()
 
-	r, err := tty.ReadRune()
+	r, err := tty.ReadString()
 	if err != nil {
 		return "", err
 	}
 
-	utils.WriteColorLn(string(r), "yellow")
+	utils.WriteColorLn(r, "yellow")
 
-	return string(r), nil
+	// Si l'entrée est plus longue qu'une lettre, on considère que c'est une tentative de mot
+	if len(strings.TrimSpace(r)) > 1 {
+		// Charger la liste des mots
+		words, err := utils.ReadWordsFromFile("mot.txt")
+		if err != nil {
+			utils.WriteColorLn(centerString("Erreur lors de la lecture du fichier de mots"), "red")
+			return r, nil
+		}
+
+		// Convertir l'entrée en majuscules pour la comparaison
+		guessWord := strings.ToUpper(strings.TrimSpace(r))
+
+		// Vérifier si le mot existe dans la liste
+		wordExists := false
+		for _, word := range words {
+			if strings.ToUpper(word) == guessWord {
+				wordExists = true
+				break
+			}
+		}
+
+		if !wordExists {
+			utils.WriteColorLn(centerString("Le mot n'existe pas dans la liste ! (-2 essais)"), "red")
+			// Retourner une valeur spéciale pour indiquer la pénalité
+			return "PENALTY", nil
+		}
+	}
+
+	return r, nil
 }
 
 func revealRandomLetter(word string, guessedLetters map[rune]bool) {
