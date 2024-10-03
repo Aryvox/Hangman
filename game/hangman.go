@@ -5,6 +5,7 @@ import (
 	"hangman/graphic"
 	"hangman/sounds"
 	"hangman/utils"
+	"hangman/values"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -28,7 +29,7 @@ func centerString(s string) string {
 }
 
 func StartGame() {
-	words, err := utils.ReadWordsFromFile("mot.txt")
+	words, err := utils.ReadWordsFromFile(values.CurrentWordFile)
 	if err != nil {
 		utils.WriteColorLn(centerString("Erreur lors de la lecture du fichier de mots"), "red")
 		time.Sleep(3 * time.Second)
@@ -120,7 +121,7 @@ func StartGame() {
 	displayHangman(wrongGuesses)
 	displayWord(word, guessedLetters)
 	utils.WriteColorLn(centerString("Désolé, vous avez perdu. Le mot était : "+word), "red")
-	utils.PlaySound(sounds.Wasted, 1)
+	go utils.PlaySound(sounds.Wasted, 1)
 	time.Sleep(3 * time.Second)
 	utils.ClearTerminal()
 	graphic.RefreshMainMenu()
@@ -195,7 +196,7 @@ func getInput() (string, error) {
 	// Si l'entrée est plus longue qu'une lettre, on considère que c'est une tentative de mot
 	if len(strings.TrimSpace(r)) > 1 {
 		// Charger la liste des mots
-		words, err := utils.ReadWordsFromFile("mot.txt")
+		words, err := utils.ReadWordsFromFile(values.CurrentWordFile)
 		if err != nil {
 			utils.WriteColorLn(centerString("Erreur lors de la lecture du fichier de mots"), "red")
 			return r, nil
