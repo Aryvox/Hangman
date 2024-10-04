@@ -17,7 +17,6 @@ func RefreshMainMenu() {
 	switch values.CurrentOption {
 	case 0:
 		utils.WriteColor(utils.CenterText("> Jouer au Pendu          |", 65), "green")
-		utils.Writeln(utils.CenterText("| Crédits                 |", 65))
 		utils.Writeln(utils.CenterText("| Changer les mots        |", 65))
 		utils.Writeln(utils.CenterText("| Quitter                 |", 65))
 		utils.Writeln(utils.CenterText("===========================", 65))
@@ -27,24 +26,12 @@ func RefreshMainMenu() {
 		break
 	case 1:
 		utils.Writeln(utils.CenterText("| Jouer au Pendu          |", 65))
-		utils.WriteColor(utils.CenterText("> Crédits                 |", 65), "yellow")
-		utils.Writeln(utils.CenterText("| Changer les mots        |", 65))
-		utils.Writeln(utils.CenterText("| Quitter                 |", 65))
-		utils.Writeln(utils.CenterText("===========================", 65))
-		utils.Writeln("")
-		utils.Writeln("")
-		utils.Writeln(ascii.Credits)
-		break
-	case 2:
-		utils.Writeln(utils.CenterText("| Jouer au Pendu          |", 65))
-		utils.Writeln(utils.CenterText("| Crédits                 |", 65))
 		utils.WriteColor(utils.CenterText("> Changer les mots        |", 65), "yellow")
 		utils.Writeln(utils.CenterText("| Quitter                 |", 65))
 		utils.Writeln(utils.CenterText("===========================", 65))
 		break
-	case 3:
+	case 2:
 		utils.Writeln(utils.CenterText("| Jouer au Pendu          |", 65))
-		utils.Writeln(utils.CenterText("| Crédits                 |", 65))
 		utils.Writeln(utils.CenterText("| Changer les mots        |", 65))
 		utils.WriteColor(utils.CenterText("> Quitter                 |", 65), "red")
 		utils.Writeln(utils.CenterText("===========================", 65))

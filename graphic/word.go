@@ -1,6 +1,7 @@
 package graphic
 
 import (
+	"hangman/ascii"
 	"hangman/utils"
 	"hangman/values"
 )
@@ -8,6 +9,8 @@ import (
 func RefreshWordMenu() {
 	utils.ClearTerminal()
 	utils.Writeln("")
+	utils.Writeln("")
+	utils.Writeln(ascii.WordSelec)
 	utils.Writeln(utils.CenterText("=== Sélection de la liste de mots ===", 65))
 
 	for i, wordFile := range values.WordFiles {

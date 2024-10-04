@@ -29,29 +29,14 @@ func MenuExec() {
 		utils.ClearTerminal()
 		game.StartGame()
 	case 1:
-		values.CurrentPage = "credits"
-		utils.ClearTerminal()
-		graphic.RefreshCreditsMenu()
-	case 2:
 		values.CurrentPage = "word_menu" // Changed from "mot" to "word_menu"
 		values.CurrentOption = 0         // Reset l'option sélectionnée
 		utils.ClearTerminal()
 		graphic.RefreshWordMenu()
-	case 3:
+	case 2:
 		PressF11()
 		utils.ClearTerminal()
 		os.Exit(0)
-	}
-}
-
-func CreditsExec() {
-	switch values.CurrentOption {
-	case 0:
-		values.CurrentOption = 0
-		values.CurrentPage = "credits"
-		values.CurrentOptionMax = 0
-		utils.ClearTerminal()
-		graphic.RefreshMainMenu()
 	}
 }
 

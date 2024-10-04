@@ -33,11 +33,8 @@ func StartListening() {
 			var funcType func()
 			switch values.CurrentPage {
 			case "main_menu":
-				maxIndex = 3
+				maxIndex = 2
 				funcType = graphic.RefreshMainMenu
-			case "credits":
-				maxIndex = 1
-				funcType = graphic.RefreshCreditsMenu
 			case "word_menu": // Changed from "mot" to "word_menu"
 				maxIndex = len(values.WordFiles) // Nombre d'options + le bouton retour
 				funcType = graphic.RefreshWordMenu
@@ -63,8 +60,6 @@ func StartListening() {
 				switch values.CurrentPage {
 				case "main_menu":
 					actions.MenuExec()
-				case "credits":
-					actions.CreditsExec()
 				case "word_menu": // Changed from "mot" to "word_menu"
 					actions.WordExec()
 				default:
